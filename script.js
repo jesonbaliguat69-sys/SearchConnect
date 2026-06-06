@@ -11,12 +11,25 @@
 const app = {
     currentUser: {
         id: 1,
-        username: 'Alex Johnson',
+        username: 'Ava Johnson',
         bio: '📱 Tech enthusiast | 🌍 Digital explorer | 💡 Always learning',
-        profilePic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+        profilePic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
         followers: 2450,
         following: 1230,
-        posts: []
+        posts: [
+            {
+                id: 4,
+                username: 'Ava Johnson',
+                image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop',
+                caption: 'Mountain hiking adventure with friends 🏔️ Feeling alive! #Adventure #Nature #Hiking',
+                likes: 423,
+                commentsList: [
+                    { username: 'Sarah Chen', text: 'Looks amazing! 🏔️', userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' },
+                    { username: 'Lisa Fashion', text: 'Wish I was there!', userPic: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop' },
+                    { username: 'Marcus Tech', text: 'Great shot!', userPic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' }
+                ]
+            }
+        ]
     },
     
     posts: [
@@ -43,7 +56,7 @@ const app = {
             likes: 891,
             liked: false,
             commentsList: [
-                { username: 'Alex Johnson', text: 'Which one is your favorite?', userPic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop' }
+                { username: 'Ava Johnson', text: 'Which one is your favorite?', userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' }
             ],
             timestamp: '5 hours ago'
         },
@@ -60,8 +73,8 @@ const app = {
         },
         {
             id: 4,
-            username: 'Alex Johnson',
-            userPic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop',
+            username: 'Ava Johnson',
+            userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
             image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=500&h=500&fit=crop',
             caption: 'Mountain hiking adventure with friends 🏔️ Feeling alive! #Adventure #Nature #Hiking',
             likes: 423,
@@ -85,6 +98,57 @@ const app = {
                 { username: 'Emma Design', text: 'Love this outfit! 💕', userPic: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop' }
             ],
             timestamp: '1 day ago'
+        },
+        {
+            id: 6,
+            username: 'Nina Patel',
+            userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
+            image: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=500&h=500&fit=crop',
+            caption: 'Coffee, code, and calm mornings ☕💻 #MorningVibes #Productivity #TechLife',
+            likes: 198,
+            liked: false,
+            commentsList: [
+                { username: 'Ava Johnson', text: 'Such a clean setup!', userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' }
+            ],
+            timestamp: '2 days ago'
+        },
+        {
+            id: 7,
+            username: 'Chloe Rivers',
+            userPic: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop',
+            image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&h=500&fit=crop',
+            caption: 'City lights and golden hour walks 🌆✨ #CityLife #StreetStyle #NightMood',
+            likes: 256,
+            liked: false,
+            commentsList: [],
+            timestamp: '2 days ago'
+        },
+        {
+            id: 8,
+            username: 'Maya Brooks',
+            userPic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop',
+            image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&h=500&fit=crop',
+            caption: 'Weekend self-care reset 🫶🌿 #SelfCare #Wellness #WeekendMood',
+            likes: 319,
+            liked: false,
+            commentsList: [
+                { username: 'Lisa Fashion', text: 'Love the vibe!', userPic: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop' },
+                { username: 'Emma Design', text: 'So peaceful ✨', userPic: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop' }
+            ],
+            timestamp: '3 days ago'
+        },
+        {
+            id: 9,
+            username: 'Ava Johnson',
+            userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop',
+            image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=500&h=500&fit=crop',
+            caption: 'New post from my studio desk today ✨ Keeping it simple and productive. #SearchConnect #StudyMode #NewPost',
+            likes: 176,
+            liked: false,
+            commentsList: [
+                { username: 'Nina Patel', text: 'Love the clean setup!', userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop' }
+            ],
+            timestamp: 'just now'
         }
     ],
     
@@ -156,11 +220,16 @@ const app = {
         { id: 2, username: 'Marcus Tech', userPic: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop', bio: 'Tech Enthusiast' },
         { id: 3, username: 'Emma Design', userPic: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150&h=150&fit=crop', bio: 'UI/UX Designer' },
         { id: 4, username: 'Lisa Fashion', userPic: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop', bio: 'Fashion & Lifestyle' },
-        { id: 5, username: 'John Developer', userPic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop', bio: 'Full Stack Developer' }
+        { id: 5, username: 'John Developer', userPic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop', bio: 'Full Stack Developer' },
+        { id: 6, username: 'Nina Patel', userPic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop', bio: 'Product Designer' },
+        { id: 7, username: 'Chloe Rivers', userPic: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop', bio: 'City Photographer' },
+        { id: 8, username: 'Maya Brooks', userPic: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop', bio: 'Wellness & Lifestyle' }
     ],
     
     // Filter state
-    filterByUsername: null
+    filterByUsername: null,
+    filterByHashtag: null,
+    filterByCaption: null
 };
 
 /* ========================================
@@ -183,13 +252,14 @@ function initNavigation() {
             // Clear filter when clicking home button normally
             if (pageId === 'home-page') {
                 app.filterByUsername = null;
+                app.filterByHashtag = null;
+                app.filterByCaption = null;
             }
             
             navigateToPage(pageId, button);
         };
         
         button.addEventListener('click', handleNav);
-        button.addEventListener('touchend', handleNav);
     });
 }
 
@@ -245,6 +315,14 @@ function renderFeed() {
     let postsToShow = app.posts;
     if (app.filterByUsername) {
         postsToShow = app.posts.filter(post => post.username === app.filterByUsername);
+    } else if (app.filterByHashtag) {
+        const hashtag = app.filterByHashtag.toLowerCase();
+        const hashtagMatches = app.posts.filter(post => post.caption.toLowerCase().includes(hashtag));
+        postsToShow = hashtagMatches.length > 0 ? hashtagMatches : app.posts;
+    } else if (app.filterByCaption) {
+        const captionQuery = app.filterByCaption.toLowerCase();
+        const captionMatches = app.posts.filter(post => post.caption.toLowerCase().includes(captionQuery));
+        postsToShow = captionMatches.length > 0 ? captionMatches : app.posts;
     }
     
     if (postsToShow.length === 0) {
@@ -321,10 +399,11 @@ function createPostElement(post) {
         </div>
     `;
     
-    // Attach event listeners with both click and touch support
+    // Attach event listeners for tap-friendly mobile behavior
     const likeBtn = postCard.querySelector('.like-btn');
     const commentBtn = postCard.querySelector('.comment-btn');
     const deleteBtn = postCard.querySelector('.delete-post-btn');
+    const postImage = postCard.querySelector('.post-image');
     
     if (likeBtn) {
         const handleLikeClick = (e) => {
@@ -332,7 +411,6 @@ function createPostElement(post) {
             handleLike(post, likeBtn);
         };
         likeBtn.addEventListener('click', handleLikeClick);
-        likeBtn.addEventListener('touchend', handleLikeClick);
     }
     
     if (commentBtn) {
@@ -341,7 +419,6 @@ function createPostElement(post) {
             handleComment(post);
         };
         commentBtn.addEventListener('click', handleCommentClick);
-        commentBtn.addEventListener('touchend', handleCommentClick);
     }
     
     if (deleteBtn) {
@@ -350,17 +427,15 @@ function createPostElement(post) {
             openDeletePostModal(post);
         };
         deleteBtn.addEventListener('click', handleDeleteClick);
-        deleteBtn.addEventListener('touchend', handleDeleteClick);
     }
     
-    // Click on post card to view details (but not on buttons)
-    const handlePostCardClick = (e) => {
-        if (!e.target.closest('.action-btn') && !e.target.closest('.delete-post-btn')) {
+    // Open the detail modal only when the image is pressed.
+    if (postImage) {
+        postImage.addEventListener('click', (e) => {
+            e.stopPropagation();
             openPostDetailModal(post);
-        }
-    };
-    postCard.addEventListener('click', handlePostCardClick);
-    postCard.addEventListener('touchend', handlePostCardClick);
+        });
+    }
     
     return postCard;
 }
@@ -492,13 +567,12 @@ function initCreatePost() {
     const charCount = document.getElementById('char-count');
     const createPostBtn = document.getElementById('create-post-btn');
     
-    // Image upload handling with touch support
+    // Image upload handling for mobile taps
     const uploadHandler = (e) => {
         e.stopPropagation();
         imageInput.click();
     };
     imageUploadArea.addEventListener('click', uploadHandler);
-    imageUploadArea.addEventListener('touchend', uploadHandler);
     
     imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -522,7 +596,7 @@ function initCreatePost() {
         charCount.textContent = e.target.value.length;
     });
     
-    // Create post button with touch support
+    // Create post button for mobile taps
     if (createPostBtn) {
         const createHandler = (e) => {
             e.stopPropagation();
@@ -575,7 +649,6 @@ function initCreatePost() {
         };
         
         createPostBtn.addEventListener('click', createHandler);
-        createPostBtn.addEventListener('touchend', createHandler);
     }
 }
 
@@ -626,7 +699,6 @@ function initSearch() {
             performSearch();
         };
         searchBtn.addEventListener('click', searchHandler);
-        searchBtn.addEventListener('touchend', searchHandler);
     }
     
     if (searchInput) {
@@ -642,19 +714,31 @@ function initSearch() {
 function performSearch() {
     const searchInput = document.getElementById('search-input');
     const query = searchInput.value.trim().toLowerCase();
-    const searchResults = document.getElementById('search-results');
+    const captionMatches = app.posts.filter(post =>
+        post.caption.toLowerCase().includes(query)
+    );
     
     if (!query) {
-        searchResults.innerHTML = '';
+        app.filterByCaption = null;
         return;
     }
-    
+
+    if (captionMatches.length > 0) {
+        app.filterByUsername = null;
+        app.filterByHashtag = null;
+        app.filterByCaption = query;
+        navigateToPage('home-page', document.getElementById('nav-home'));
+        showToast(`🔎 Showing posts for "${query}"`, 'info');
+        return;
+    }
+
+    const searchResults = document.getElementById('search-results');
     let results = [];
-    
+
     // Search users
     results = results.concat(
         app.users
-            .filter(user => 
+            .filter(user =>
                 user.username.toLowerCase().includes(query) ||
                 user.bio.toLowerCase().includes(query)
             )
@@ -663,7 +747,7 @@ function performSearch() {
                 ...user
             }))
     );
-    
+
     // Search hashtags/posts
     results = results.concat(
         app.searchTrending
@@ -673,21 +757,10 @@ function performSearch() {
                 ...trend
             }))
     );
-    
-    // Search posts by caption
-    results = results.concat(
-        app.posts
-            .filter(post =>
-                post.caption.toLowerCase().includes(query) ||
-                post.username.toLowerCase().includes(query)
-            )
-            .map(post => ({
-                type: 'post',
-                ...post
-            }))
-    );
-    
-    renderSearchResults(results);
+
+    if (searchResults) {
+        renderSearchResults(results);
+    }
 }
 
 /**
@@ -726,7 +799,6 @@ function renderSearchResults(results) {
                 viewUserPosts(result.username);
             };
             resultElement.addEventListener('click', handleClick);
-            resultElement.addEventListener('touchend', handleClick);
         } else if (result.type === 'hashtag') {
             resultElement.innerHTML = `
                 <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d4ff, #ff1493); border-radius: 50%; font-size: 24px;">📌</div>
@@ -734,13 +806,12 @@ function renderSearchResults(results) {
                     <div class="search-result-name">${result.tag}</div>
                     <div class="search-result-meta">${result.posts}</div>
                 </div>
-            `;
+            `; 
             const handleClick = (e) => {
                 e.stopPropagation();
-                showToast(`🏷️ Viewing posts tagged ${result.tag}`, 'info');
+                showHashtagPosts(result.tag);
             };
             resultElement.addEventListener('click', handleClick);
-            resultElement.addEventListener('touchend', handleClick);
         } else if (result.type === 'post') {
             resultElement.innerHTML = `
                 <img src="${result.userPic}" alt="${result.username}" class="search-result-pic">
@@ -754,7 +825,6 @@ function renderSearchResults(results) {
                 showToast('📸 Viewing full post', 'info');
             };
             resultElement.addEventListener('click', handleClick);
-            resultElement.addEventListener('touchend', handleClick);
         }
         
         searchResults.appendChild(resultElement);
@@ -781,12 +851,23 @@ function renderTrendingSection() {
             if (searchInput) {
                 searchInput.value = trend.tag;
             }
-            performSearch();
+            showHashtagPosts(trend.tag);
         };
         trendItem.addEventListener('click', handleClick);
-        trendItem.addEventListener('touchend', handleClick);
         trendingList.appendChild(trendItem);
     });
+}
+
+/**
+ * Show hashtag results in the home feed
+ * @param {string} tag - Hashtag tag
+ */
+function showHashtagPosts(tag) {
+    app.filterByUsername = null;
+    app.filterByHashtag = tag;
+    app.filterByCaption = null;
+    navigateToPage('home-page', document.getElementById('nav-home'));
+    showToast(`🏷️ Showing posts for ${tag}`, 'info');
 }
 
 /* ========================================
@@ -838,6 +919,8 @@ function renderNotifications() {
  */
 function viewUserPosts(username) {
     app.filterByUsername = username;
+    app.filterByHashtag = null;
+    app.filterByCaption = null;
     navigateToPage('home-page', document.getElementById('nav-home'));
     showToast(`📸 Viewing posts from ${username}`, 'info');
 }
@@ -898,7 +981,7 @@ function renderProfilePosts() {
                 <div class="profile-post-overlay-text">❤️ ${post.likes} 💬 ${post.commentsList.length}</div>
             </div>
         `;
-        postItem.addEventListener('click', () => showToast('📸 Full post view coming soon!', 'info'));
+        postItem.addEventListener('click', () => openPostDetailModal(post));
         profilePostsGrid.appendChild(postItem);
     });
 }
@@ -977,7 +1060,6 @@ function initCommentModal() {
             closeCommentModal();
         };
         modalClose.addEventListener('click', closeHandler);
-        modalClose.addEventListener('touchend', closeHandler);
     }
     
     // Close on outside click
@@ -996,7 +1078,6 @@ function initCommentModal() {
             addComment();
         };
         commentSubmitBtn.addEventListener('click', submitHandler);
-        commentSubmitBtn.addEventListener('touchend', submitHandler);
     }
     
     if (commentTextInput) {
@@ -1028,7 +1109,6 @@ function initEditProfileModal() {
             openEditProfileModal();
         };
         editProfileBtn.addEventListener('click', openHandler);
-        editProfileBtn.addEventListener('touchend', openHandler);
     }
     
     // Close modal
@@ -1038,7 +1118,6 @@ function initEditProfileModal() {
             closeEditProfileModal();
         };
         editProfileClose.addEventListener('click', closeHandler);
-        editProfileClose.addEventListener('touchend', closeHandler);
     }
     
     // Close on outside click
@@ -1057,7 +1136,6 @@ function initEditProfileModal() {
             saveProfileChanges();
         };
         saveProfileBtn.addEventListener('click', saveHandler);
-        saveProfileBtn.addEventListener('touchend', saveHandler);
     }
     
     // Profile picture upload functionality
@@ -1073,7 +1151,6 @@ function initEditProfileModal() {
             profilePicInput.click();
         };
         profilePicUploadArea.addEventListener('click', uploadHandler);
-        profilePicUploadArea.addEventListener('touchend', uploadHandler);
         
         // Handle file selection
         profilePicInput.addEventListener('change', (e) => {
@@ -1201,7 +1278,6 @@ function initDeletePostModal() {
             closeDeletePostModal();
         };
         cancelDeleteBtn.addEventListener('click', cancelHandler);
-        cancelDeleteBtn.addEventListener('touchend', cancelHandler);
     }
     
     // Close on outside click
@@ -1220,7 +1296,6 @@ function initDeletePostModal() {
             confirmDeletePost();
         };
         confirmDeleteBtn.addEventListener('click', confirmHandler);
-        confirmDeleteBtn.addEventListener('touchend', confirmHandler);
     }
 }
 
@@ -1337,7 +1412,7 @@ function openPostDetailModal(post) {
         </div>
     `;
     
-    // Add event listeners with touch support
+    // Add event listeners for the post detail modal
     const likeBtn = container.querySelector('.like-btn');
     const commentBtn = container.querySelector('.comment-btn');
     const deleteBtn = container.querySelector('.delete-post-btn');
@@ -1349,7 +1424,6 @@ function openPostDetailModal(post) {
             openPostDetailModal(post); // Refresh modal
         };
         likeBtn.addEventListener('click', handleLikeClick);
-        likeBtn.addEventListener('touchend', handleLikeClick);
     }
     
     if (commentBtn) {
@@ -1359,7 +1433,6 @@ function openPostDetailModal(post) {
             closePostDetailModal();
         };
         commentBtn.addEventListener('click', handleCommentClick);
-        commentBtn.addEventListener('touchend', handleCommentClick);
     }
     
     if (deleteBtn) {
@@ -1369,7 +1442,6 @@ function openPostDetailModal(post) {
             closePostDetailModal();
         };
         deleteBtn.addEventListener('click', handleDeleteClick);
-        deleteBtn.addEventListener('touchend', handleDeleteClick);
     }
     
     modal.classList.add('show');
@@ -1396,7 +1468,6 @@ function initPostDetailModal() {
             closePostDetailModal();
         };
         closeBtn.addEventListener('click', closeHandler);
-        closeBtn.addEventListener('touchend', closeHandler);
     }
     
     if (modal) {
@@ -1474,13 +1545,6 @@ function formatTimestamp(date) {
    ADDITIONAL FEATURES & ANDROID OPTIMIZATION
    ======================================== */
 
-// Prevent double tap zoom on buttons (Android optimization)
-document.addEventListener('touchend', (e) => {
-    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
-        e.preventDefault();
-    }
-}, false);
-
 // Handle back button navigation
 let lastPage = 'home-page';
 window.addEventListener('popstate', (e) => {
@@ -1488,27 +1552,6 @@ window.addEventListener('popstate', (e) => {
         navigateToPage(e.state.page, document.querySelector(`[data-page="${e.state.page}"]`));
     }
 });
-
-// Android optimization: Add touch feedback to interactive elements
-document.addEventListener('touchstart', (e) => {
-    if (e.target.classList && e.target.classList.contains('action-btn')) {
-        e.target.style.opacity = '0.7';
-    }
-}, false);
-
-document.addEventListener('touchend', (e) => {
-    if (e.target.classList && e.target.classList.contains('action-btn')) {
-        e.target.style.opacity = '1';
-    }
-}, false);
-
-// Prevent viewport zoom on form inputs (Android)
-document.addEventListener('touchmove', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-        // Allow normal behavior for inputs
-        return;
-    }
-}, { passive: true });
 
 // Log app state for debugging (can be removed in production)
 window.getAppState = () => app;
