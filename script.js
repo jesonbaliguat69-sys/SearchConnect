@@ -174,8 +174,10 @@ function initNavigation() {
     const navButtons = document.querySelectorAll('.nav-btn');
     
     navButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
+        // Support both click and touch events
+        const handleNav = (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const pageId = button.getAttribute('data-page');
             
             // Clear filter when clicking home button normally
@@ -184,7 +186,10 @@ function initNavigation() {
             }
             
             navigateToPage(pageId, button);
-        });
+        };
+        
+        button.addEventListener('click', handleNav);
+        button.addEventListener('touchend', handleNav);
     });
 }
 
@@ -316,28 +321,46 @@ function createPostElement(post) {
         </div>
     `;
     
-    // Attach event listeners
+    // Attach event listeners with both click and touch support
     const likeBtn = postCard.querySelector('.like-btn');
     const commentBtn = postCard.querySelector('.comment-btn');
     const deleteBtn = postCard.querySelector('.delete-post-btn');
     
-    likeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleLike(post, e.target.closest('.like-btn'));
-    });
-    commentBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        handleComment(post);
-    });
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', (e) => {
+    if (likeBtn) {
+        const handleLikeClick = (e) => {
             e.stopPropagation();
-            openDeletePostModal(post);
-        });
+            handleLike(post, likeBtn);
+        };
+        likeBtn.addEventListener('click', handleLikeClick);
+        likeBtn.addEventListener('touchend', handleLikeClick);
     }
     
-    // Click on post card to view details
-    postCard.addEventListener('click', () => openPostDetailModal(post));
+    if (commentBtn) {
+        const handleCommentClick = (e) => {
+            e.stopPropagation();
+            handleComment(post);
+        };
+        commentBtn.addEventListener('click', handleCommentClick);
+        commentBtn.addEventListener('touchend', handleCommentClick);
+    }
+    
+    if (deleteBtn) {
+        const handleDeleteClick = (e) => {
+            e.stopPropagation();
+            openDeletePostModal(post);
+        };
+        deleteBtn.addEventListener('click', handleDeleteClick);
+        deleteBtn.addEventListener('touchend', handleDeleteClick);
+    }
+    
+    // Click on post card to view details (but not on buttons)
+    const handlePostCardClick = (e) => {
+        if (!e.target.closest('.action-btn') && !e.target.closest('.delete-post-btn')) {
+            openPostDetailModal(post);
+        }
+    };
+    postCard.addEventListener('click', handlePostCardClick);
+    postCard.addEventListener('touchend', handlePostCardClick);
     
     return postCard;
 }
@@ -469,8 +492,13 @@ function initCreatePost() {
     const charCount = document.getElementById('char-count');
     const createPostBtn = document.getElementById('create-post-btn');
     
-    // Image upload handling
-    imageUploadArea.addEventListener('click', () => imageInput.click());
+    // Image upload handling with touch support
+    const uploadHandler = (e) => {
+        e.stopPropagation();
+        imageInput.click();
+    };
+    imageUploadArea.addEventListener('click', uploadHandler);
+    imageUploadArea.addEventListener('touchend', uploadHandler);
     
     imageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -494,27 +522,29 @@ function initCreatePost() {
         charCount.textContent = e.target.value.length;
     });
     
-    // Create post button
-    createPostBtn.addEventListener('click', () => {
-        const caption = captionInput.value.trim();
-        
-        if (!imagePreview.src || imagePreview.style.display === 'none') {
-            showToast('⚠️ Please add an image!', 'error');
-            return;
-        }
-        
-        if (!caption) {
-            showToast('⚠️ Please add a caption!', 'error');
-            return;
-        }
-        
-        // Create new post
-        const newPost = {
-            id: app.posts.length + 1,
-            username: app.currentUser.username,
-            userPic: app.currentUser.profilePic,
-            image: imagePreview.src,
-            caption: caption,
+    // Create post button with touch support
+    if (createPostBtn) {
+        const createHandler = (e) => {
+            e.stopPropagation();
+            const caption = captionInput.value.trim();
+            
+            if (!imagePreview.src || imagePreview.style.display === 'none') {
+                showToast('⚠️ Please add an image!', 'error');
+                return;
+            }
+            
+            if (!caption) {
+                showToast('⚠️ Please add a caption!', 'error');
+                return;
+            }
+            
+            // Create new post
+            const newPost = {
+                id: app.posts.length + 1,
+                username: app.currentUser.username,
+                userPic: app.currentUser.profilePic,
+                image: imagePreview.src,
+                caption: caption,
             likes: 0,
             liked: false,
             commentsList: [],
@@ -542,7 +572,11 @@ function initCreatePost() {
         
         // Navigate to home to show new post
         navigateToPage('home-page', document.getElementById('nav-home'));
-    });
+        };
+        
+        createPostBtn.addEventListener('click', createHandler);
+        createPostBtn.addEventListener('touchend', createHandler);
+    }
 }
 
 /**
@@ -586,10 +620,20 @@ function initSearch() {
     const searchInput = document.getElementById('search-input');
     const searchBtn = document.getElementById('search-btn');
     
-    searchBtn.addEventListener('click', () => performSearch());
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
+    if (searchBtn) {
+        const searchHandler = (e) => {
+            e.stopPropagation();
+            performSearch();
+        };
+        searchBtn.addEventListener('click', searchHandler);
+        searchBtn.addEventListener('touchend', searchHandler);
+    }
+    
+    if (searchInput) {
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+    }
 }
 
 /**
@@ -677,7 +721,12 @@ function renderSearchResults(results) {
                     <div class="search-result-meta">${result.bio}</div>
                 </div>
             `;
-            resultElement.addEventListener('click', () => viewUserPosts(result.username));
+            const handleClick = (e) => {
+                e.stopPropagation();
+                viewUserPosts(result.username);
+            };
+            resultElement.addEventListener('click', handleClick);
+            resultElement.addEventListener('touchend', handleClick);
         } else if (result.type === 'hashtag') {
             resultElement.innerHTML = `
                 <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #00d4ff, #ff1493); border-radius: 50%; font-size: 24px;">📌</div>
@@ -686,7 +735,12 @@ function renderSearchResults(results) {
                     <div class="search-result-meta">${result.posts}</div>
                 </div>
             `;
-            resultElement.addEventListener('click', () => showToast(`🏷️ Viewing posts tagged ${result.tag}`, 'info'));
+            const handleClick = (e) => {
+                e.stopPropagation();
+                showToast(`🏷️ Viewing posts tagged ${result.tag}`, 'info');
+            };
+            resultElement.addEventListener('click', handleClick);
+            resultElement.addEventListener('touchend', handleClick);
         } else if (result.type === 'post') {
             resultElement.innerHTML = `
                 <img src="${result.userPic}" alt="${result.username}" class="search-result-pic">
@@ -695,7 +749,12 @@ function renderSearchResults(results) {
                     <div class="search-result-meta">${result.caption.substring(0, 60)}...</div>
                 </div>
             `;
-            resultElement.addEventListener('click', () => showToast('📸 Viewing full post', 'info'));
+            const handleClick = (e) => {
+                e.stopPropagation();
+                showToast('📸 Viewing full post', 'info');
+            };
+            resultElement.addEventListener('click', handleClick);
+            resultElement.addEventListener('touchend', handleClick);
         }
         
         searchResults.appendChild(resultElement);
@@ -716,10 +775,16 @@ function renderTrendingSection() {
             <div class="trending-tag">${trend.tag}</div>
             <div class="trending-count">${trend.posts}</div>
         `;
-        trendItem.addEventListener('click', () => {
-            document.getElementById('search-input').value = trend.tag;
+        const handleClick = (e) => {
+            e.stopPropagation();
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = trend.tag;
+            }
             performSearch();
-        });
+        };
+        trendItem.addEventListener('click', handleClick);
+        trendItem.addEventListener('touchend', handleClick);
         trendingList.appendChild(trendItem);
     });
 }
@@ -906,22 +971,41 @@ function initCommentModal() {
     const commentTextInput = document.getElementById('comment-text-input');
     
     // Close modal button
-    modalClose.addEventListener('click', closeCommentModal);
+    if (modalClose) {
+        const closeHandler = (e) => {
+            e.stopPropagation();
+            closeCommentModal();
+        };
+        modalClose.addEventListener('click', closeHandler);
+        modalClose.addEventListener('touchend', closeHandler);
+    }
     
     // Close on outside click
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeCommentModal();
-        }
-    });
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeCommentModal();
+            }
+        });
+    }
     
     // Submit comment
-    commentSubmitBtn.addEventListener('click', addComment);
-    commentTextInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
+    if (commentSubmitBtn) {
+        const submitHandler = (e) => {
+            e.stopPropagation();
             addComment();
-        }
-    });
+        };
+        commentSubmitBtn.addEventListener('click', submitHandler);
+        commentSubmitBtn.addEventListener('touchend', submitHandler);
+    }
+    
+    if (commentTextInput) {
+        commentTextInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addComment();
+            }
+        });
+    }
 }
 
 /* ========================================
@@ -938,20 +1022,43 @@ function initEditProfileModal() {
     const saveProfileBtn = document.getElementById('save-profile-btn');
     
     // Open edit profile modal
-    editProfileBtn.addEventListener('click', openEditProfileModal);
+    if (editProfileBtn) {
+        const openHandler = (e) => {
+            e.stopPropagation();
+            openEditProfileModal();
+        };
+        editProfileBtn.addEventListener('click', openHandler);
+        editProfileBtn.addEventListener('touchend', openHandler);
+    }
     
     // Close modal
-    editProfileClose.addEventListener('click', closeEditProfileModal);
+    if (editProfileClose) {
+        const closeHandler = (e) => {
+            e.stopPropagation();
+            closeEditProfileModal();
+        };
+        editProfileClose.addEventListener('click', closeHandler);
+        editProfileClose.addEventListener('touchend', closeHandler);
+    }
     
     // Close on outside click
-    editProfileModal.addEventListener('click', (e) => {
-        if (e.target === editProfileModal) {
-            closeEditProfileModal();
-        }
-    });
+    if (editProfileModal) {
+        editProfileModal.addEventListener('click', (e) => {
+            if (e.target === editProfileModal) {
+                closeEditProfileModal();
+            }
+        });
+    }
     
     // Save profile
-    saveProfileBtn.addEventListener('click', saveProfileChanges);
+    if (saveProfileBtn) {
+        const saveHandler = (e) => {
+            e.stopPropagation();
+            saveProfileChanges();
+        };
+        saveProfileBtn.addEventListener('click', saveHandler);
+        saveProfileBtn.addEventListener('touchend', saveHandler);
+    }
     
     // Profile picture upload functionality
     const profilePicUploadArea = document.getElementById('profile-pic-upload-area');
@@ -961,9 +1068,12 @@ function initEditProfileModal() {
     
     if (profilePicUploadArea && profilePicInput) {
         // Click upload area to open file picker
-        profilePicUploadArea.addEventListener('click', () => {
+        const uploadHandler = (e) => {
+            e.stopPropagation();
             profilePicInput.click();
-        });
+        };
+        profilePicUploadArea.addEventListener('click', uploadHandler);
+        profilePicUploadArea.addEventListener('touchend', uploadHandler);
         
         // Handle file selection
         profilePicInput.addEventListener('change', (e) => {
@@ -1085,17 +1195,33 @@ function initDeletePostModal() {
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     
     // Cancel delete
-    cancelDeleteBtn.addEventListener('click', closeDeletePostModal);
+    if (cancelDeleteBtn) {
+        const cancelHandler = (e) => {
+            e.stopPropagation();
+            closeDeletePostModal();
+        };
+        cancelDeleteBtn.addEventListener('click', cancelHandler);
+        cancelDeleteBtn.addEventListener('touchend', cancelHandler);
+    }
     
     // Close on outside click
-    deletePostModal.addEventListener('click', (e) => {
-        if (e.target === deletePostModal) {
-            closeDeletePostModal();
-        }
-    });
+    if (deletePostModal) {
+        deletePostModal.addEventListener('click', (e) => {
+            if (e.target === deletePostModal) {
+                closeDeletePostModal();
+            }
+        });
+    }
     
     // Confirm delete
-    confirmDeleteBtn.addEventListener('click', confirmDeletePost);
+    if (confirmDeleteBtn) {
+        const confirmHandler = (e) => {
+            e.stopPropagation();
+            confirmDeletePost();
+        };
+        confirmDeleteBtn.addEventListener('click', confirmHandler);
+        confirmDeleteBtn.addEventListener('touchend', confirmHandler);
+    }
 }
 
 /**
@@ -1211,33 +1337,39 @@ function openPostDetailModal(post) {
         </div>
     `;
     
-    // Add event listeners
+    // Add event listeners with touch support
     const likeBtn = container.querySelector('.like-btn');
     const commentBtn = container.querySelector('.comment-btn');
     const deleteBtn = container.querySelector('.delete-post-btn');
     
     if (likeBtn) {
-        likeBtn.addEventListener('click', (e) => {
+        const handleLikeClick = (e) => {
             e.stopPropagation();
-            handleLike(post, e.target.closest('.like-btn'));
+            handleLike(post, likeBtn);
             openPostDetailModal(post); // Refresh modal
-        });
+        };
+        likeBtn.addEventListener('click', handleLikeClick);
+        likeBtn.addEventListener('touchend', handleLikeClick);
     }
     
     if (commentBtn) {
-        commentBtn.addEventListener('click', (e) => {
+        const handleCommentClick = (e) => {
             e.stopPropagation();
             handleComment(post);
             closePostDetailModal();
-        });
+        };
+        commentBtn.addEventListener('click', handleCommentClick);
+        commentBtn.addEventListener('touchend', handleCommentClick);
     }
     
     if (deleteBtn) {
-        deleteBtn.addEventListener('click', (e) => {
+        const handleDeleteClick = (e) => {
             e.stopPropagation();
             openDeletePostModal(post);
             closePostDetailModal();
-        });
+        };
+        deleteBtn.addEventListener('click', handleDeleteClick);
+        deleteBtn.addEventListener('touchend', handleDeleteClick);
     }
     
     modal.classList.add('show');
@@ -1259,7 +1391,12 @@ function initPostDetailModal() {
     const closeBtn = document.getElementById('post-detail-close');
     
     if (closeBtn) {
-        closeBtn.addEventListener('click', closePostDetailModal);
+        const closeHandler = (e) => {
+            e.stopPropagation();
+            closePostDetailModal();
+        };
+        closeBtn.addEventListener('click', closeHandler);
+        closeBtn.addEventListener('touchend', closeHandler);
     }
     
     if (modal) {
