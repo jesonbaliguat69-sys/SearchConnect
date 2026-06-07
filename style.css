@@ -280,15 +280,68 @@ input, textarea {
     color: var(--text-tertiary);
 }
 
-/* Post Image */
+/* Post Media */
+.post-media {
+    width: 100%;
+    display: grid;
+    gap: 2px;
+    background-color: var(--secondary-bg);
+    cursor: pointer;
+    touch-action: manipulation;
+    overflow: hidden;
+}
+
+.post-media.feed.single {
+    display: block;
+}
+
+.post-media.feed.two,
+.post-media.feed.four {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.post-media.feed.three {
+    grid-template-columns: 1.25fr 1fr;
+    grid-template-rows: repeat(2, 170px);
+}
+
+.post-media.feed.four {
+    grid-template-rows: repeat(2, 165px);
+}
+
+.post-media.feed.three .post-media-item:first-child {
+    grid-row: span 2;
+}
+
+.post-media-item {
+    position: relative;
+    overflow: hidden;
+    min-height: 165px;
+}
+
+.post-media.feed.single .post-media-item {
+    min-height: 0;
+}
+
 .post-image {
     width: 100%;
+    height: 100%;
     max-height: 400px;
     object-fit: cover;
     background-color: var(--secondary-bg);
     display: block;
-    cursor: pointer;
-    touch-action: manipulation;
+}
+
+.post-media-more {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 14, 39, 0.55);
+    color: var(--text-primary);
+    font-size: 28px;
+    font-weight: 700;
 }
 
 /* Post Caption */
@@ -545,11 +598,27 @@ input, textarea {
     font-size: 14px;
 }
 
-.image-preview {
+.image-preview-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    padding: 6px;
+}
+
+.image-preview-item {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border-radius: 14px;
+    background-color: var(--secondary-bg);
+}
+
+.image-preview-thumb {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 16px;
+    display: block;
 }
 
 /* Caption Input */
@@ -992,10 +1061,10 @@ input, textarea {
         color: inherit;
     }
 
-    .post-header:hover .delete-post-btn,
-    .post-header .delete-post-btn {
+    .post-header:hover .post-options-btn,
+    .post-header .post-options-btn {
         opacity: 1;
-        background-color: rgba(255, 0, 0, 0.1);
+        background-color: rgba(255, 255, 255, 0.08);
     }
 
     .image-upload-area.has-image .remove-image-btn {
@@ -1449,28 +1518,84 @@ input, textarea {
 }
 
 /* ========================================
-   16. DELETE POST BUTTON
+   16. POST OPTIONS MENU
    ======================================== */
 
+.post-options-wrapper {
+    position: relative;
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.post-options-btn,
 .delete-post-btn {
-    background: none;
-    color: var(--danger);
-    border: none;
-    font-size: 18px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+    border: 1px solid transparent;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 1;
     cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 6px;
     transition: all var(--transition-fast);
-    opacity: 0;
 }
 
-.post-header:hover .delete-post-btn {
+.post-options-btn {
+    opacity: 0.9;
+}
+
+.post-header:hover .post-options-btn,
+.post-options-btn:focus-visible {
     opacity: 1;
-    background-color: rgba(255, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: var(--border-color);
 }
 
-.delete-post-btn:active {
-    transform: scale(0.9);
+.post-options-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    min-width: 180px;
+    padding: 6px;
+    background: var(--secondary-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    display: none;
+    z-index: 25;
+}
+
+.post-options-menu.show {
+    display: block;
+    animation: fadeIn var(--transition-fast);
+}
+
+.post-options-item {
+    width: 100%;
+    display: block;
+    padding: 10px 12px;
+    background: transparent;
+    color: var(--text-primary);
+    text-align: left;
+    font-size: 14px;
+    border-radius: 10px;
+}
+
+.post-options-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.post-options-item.danger {
+    color: var(--danger);
+}
+
+.post-options-item.danger:hover {
+    background: rgba(255, 0, 0, 0.12);
 }
 
 /* ========================================
@@ -1497,12 +1622,76 @@ input, textarea {
     margin-bottom: 0;
 }
 
+.post-detail-gallery {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--secondary-bg);
+}
+
+.post-detail-track {
+    display: flex;
+    transition: transform var(--transition-normal);
+}
+
+.post-detail-slide {
+    min-width: 100%;
+}
+
 .post-detail-image {
     width: 100%;
-    max-height: 400px;
+    max-height: 460px;
+    min-height: 320px;
     object-fit: cover;
     display: block;
     background-color: var(--secondary-bg);
+}
+
+.post-gallery-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(21, 25, 51, 0.82);
+    color: var(--text-primary);
+    font-size: 18px;
+    z-index: 2;
+}
+
+.post-gallery-nav.prev {
+    left: 12px;
+}
+
+.post-gallery-nav.next {
+    right: 12px;
+}
+
+.post-gallery-nav:disabled {
+    opacity: 0.35;
+}
+
+.post-gallery-dots {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.post-gallery-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.38);
+    padding: 0;
+}
+
+.post-gallery-dot.active {
+    background: var(--text-primary);
+    transform: scale(1.1);
 }
 
 #post-detail-close {

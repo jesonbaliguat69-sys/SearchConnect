@@ -71,13 +71,14 @@
                                 type="file" 
                                 id="image-input" 
                                 accept="image/*" 
+                                multiple
                                 style="display: none;"
                             >
                             <div class="upload-placeholder" id="upload-placeholder">
                                 <span class="upload-icon">📷</span>
-                                <p>Tap to upload image</p>
+                                <p>Tap to upload one or more images</p>
                             </div>
-                            <img id="image-preview" class="image-preview" style="display: none;" alt="Preview">
+                            <div id="image-preview-grid" class="image-preview-grid" style="display: none;"></div>
                         </div>
                         
                         <!-- Caption Input -->

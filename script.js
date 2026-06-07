@@ -154,6 +154,9 @@ const app = {
     
     currentCommentPostId: null,
     currentDeletePostId: null,
+    currentDetailPostId: null,
+    currentDetailImageIndex: 0,
+    currentCreateImages: [],
 
     notifications: [
         {
@@ -378,8 +381,8 @@ function createPostElement(post) {
             ${deleteButton}
         </div>
         
-        <!-- Post Image -->
-        <img src="${post.image}" alt="Post" class="post-image">
+        <!-- Post Images -->
+        ${renderPostMedia(post, 'feed')}
         
         <!-- Post Caption -->
         <div class="post-caption">
@@ -403,7 +406,7 @@ function createPostElement(post) {
     const likeBtn = postCard.querySelector('.like-btn');
     const commentBtn = postCard.querySelector('.comment-btn');
     const deleteBtn = postCard.querySelector('.delete-post-btn');
-    const postImage = postCard.querySelector('.post-image');
+    const postMedia = postCard.querySelector('.post-media');
     
     if (likeBtn) {
         const handleLikeClick = (e) => {
@@ -428,16 +431,383 @@ function createPostElement(post) {
         };
         deleteBtn.addEventListener('click', handleDeleteClick);
     }
+
+    enhanceOwnPostActions(postCard, post);
     
-    // Open the detail modal only when the image is pressed.
-    if (postImage) {
-        postImage.addEventListener('click', (e) => {
+    if (postMedia) {
+        postMedia.addEventListener('click', (e) => {
             e.stopPropagation();
-            openPostDetailModal(post);
+            const mediaItem = e.target.closest('.post-media-item');
+            const startIndex = mediaItem ? Number(mediaItem.dataset.index || 0) : 0;
+            openPostDetailModal(post, startIndex);
         });
     }
     
     return postCard;
+}
+
+/**
+ * Get every image attached to a post
+ * @param {Object} post - Post object
+ * @returns {string[]} - Post image URLs
+ */
+function getPostImages(post) {
+    if (Array.isArray(post.images) && post.images.length > 0) {
+        return post.images;
+    }
+
+    if (post.image) {
+        return [post.image];
+    }
+
+    return [];
+}
+
+/**
+ * Render post images for the feed or detail modal
+ * @param {Object} post - Post object
+ * @param {string} variant - Render variant
+ * @returns {string} - Media markup
+ */
+function renderPostMedia(post, variant) {
+    const images = getPostImages(post);
+    const imageCount = images.length;
+
+    if (imageCount === 0) {
+        return '';
+    }
+
+    if (variant === 'detail') {
+        return renderPostDetailMedia(post, app.currentDetailImageIndex || 0);
+    }
+
+    const mediaClass = 'post-media feed';
+    const gridClass = imageCount === 1 ? 'single' : imageCount === 2 ? 'two' : imageCount === 3 ? 'three' : 'four';
+    const visibleImages = imageCount > 4 ? images.slice(0, 4) : images;
+
+    const imageMarkup = visibleImages.map((imageSrc, index) => {
+        const isLastVisible = index === visibleImages.length - 1;
+        const hiddenImageCount = imageCount - visibleImages.length;
+        const showMoreOverlay = hiddenImageCount > 0 && isLastVisible;
+
+        return `
+            <div class="post-media-item ${showMoreOverlay ? 'has-more' : ''}" data-index="${index}">
+                <img src="${imageSrc}" alt="Post image ${index + 1}" class="${variant === 'detail' ? 'post-detail-image' : 'post-image'}">
+                ${showMoreOverlay ? `<div class="post-media-more">+${hiddenImageCount}</div>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    return `
+        <div class="${mediaClass} ${gridClass}" data-image-count="${imageCount}">
+            ${imageMarkup}
+        </div>
+    `;
+}
+
+/**
+ * Render the detail modal media
+ * @param {Object} post - Post object
+ * @param {number} startIndex - Starting image index
+ * @returns {string} - Detail media markup
+ */
+function renderPostDetailMedia(post, startIndex) {
+    const images = getPostImages(post);
+
+    if (images.length <= 1) {
+        const singleImage = images[0] || post.image;
+        return `<img src="${singleImage}" alt="Post" class="post-detail-image">`;
+    }
+
+    const safeStartIndex = Math.min(Math.max(startIndex, 0), images.length - 1);
+    const slideMarkup = images.map((imageSrc, index) => `
+        <div class="post-detail-slide" data-index="${index}">
+            <img src="${imageSrc}" alt="Post image ${index + 1}" class="post-detail-image">
+        </div>
+    `).join('');
+
+    const dotsMarkup = images.map((_, index) => `
+        <button type="button" class="post-gallery-dot ${index === safeStartIndex ? 'active' : ''}" data-index="${index}" aria-label="View image ${index + 1}"></button>
+    `).join('');
+
+    return `
+        <div class="post-detail-gallery" data-count="${images.length}" data-index="${safeStartIndex}">
+            <div class="post-detail-track" style="transform: translateX(-${safeStartIndex * 100}%);">
+                ${slideMarkup}
+            </div>
+            <button type="button" class="post-gallery-nav prev" aria-label="Previous image">&lt;</button>
+            <button type="button" class="post-gallery-nav next" aria-label="Next image">&gt;</button>
+            <div class="post-gallery-dots">${dotsMarkup}</div>
+        </div>
+    `;
+}
+
+/**
+ * Bind swipe and navigation controls for multi-image detail galleries
+ * @param {HTMLElement} container - Detail modal container
+ * @param {Object} post - Post object
+ */
+function bindDetailGallery(container, post) {
+    const images = getPostImages(post);
+    if (images.length <= 1) {
+        return;
+    }
+
+    const gallery = container.querySelector('.post-detail-gallery');
+    const track = container.querySelector('.post-detail-track');
+    const prevBtn = container.querySelector('.post-gallery-nav.prev');
+    const nextBtn = container.querySelector('.post-gallery-nav.next');
+    const dots = Array.from(container.querySelectorAll('.post-gallery-dot'));
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const updateGallery = (nextIndex) => {
+        const boundedIndex = Math.max(0, Math.min(nextIndex, images.length - 1));
+        app.currentDetailImageIndex = boundedIndex;
+        gallery.dataset.index = boundedIndex;
+        track.style.transform = `translateX(-${boundedIndex * 100}%)`;
+
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === boundedIndex);
+        });
+
+        prevBtn.disabled = boundedIndex === 0;
+        nextBtn.disabled = boundedIndex === images.length - 1;
+    };
+
+    prevBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateGallery(app.currentDetailImageIndex - 1);
+    });
+
+    nextBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        updateGallery(app.currentDetailImageIndex + 1);
+    });
+
+    dots.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+            e.stopPropagation();
+            updateGallery(Number(dot.dataset.index));
+        });
+    });
+
+    gallery.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+
+    gallery.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].clientX;
+        const swipeDistance = touchStartX - touchEndX;
+
+        if (Math.abs(swipeDistance) < 40) {
+            return;
+        }
+
+        if (swipeDistance > 0) {
+            updateGallery(app.currentDetailImageIndex + 1);
+            return;
+        }
+
+        updateGallery(app.currentDetailImageIndex - 1);
+    }, { passive: true });
+
+    updateGallery(app.currentDetailImageIndex);
+}
+
+/**
+ * Upgrade the existing delete button into a three-dot post menu
+ * @param {HTMLElement} scopeElement - Post card or modal container
+ * @param {Object} post - Post data object
+ */
+function enhanceOwnPostActions(scopeElement, post) {
+    const optionsButton = scopeElement.querySelector('.delete-post-btn');
+    if (!optionsButton || optionsButton.dataset.optionsUpgraded === 'true') return;
+
+    optionsButton.dataset.optionsUpgraded = 'true';
+    optionsButton.classList.remove('delete-post-btn');
+    optionsButton.classList.add('post-options-btn');
+    optionsButton.textContent = '⋯';
+    optionsButton.setAttribute('aria-label', 'Post options');
+    optionsButton.setAttribute('aria-expanded', 'false');
+
+    const optionsWrapper = document.createElement('div');
+    optionsWrapper.className = 'post-options-wrapper';
+    optionsButton.parentNode.insertBefore(optionsWrapper, optionsButton);
+    optionsWrapper.appendChild(optionsButton);
+
+    const optionsMenu = document.createElement('div');
+    optionsMenu.className = 'post-options-menu';
+    optionsMenu.setAttribute('role', 'menu');
+    optionsMenu.innerHTML = `
+        <button type="button" class="post-options-item" data-action="view">View post</button>
+        <button type="button" class="post-options-item" data-action="copy">Copy caption</button>
+        <button type="button" class="post-options-item" data-action="edit">Edit post</button>
+        <button type="button" class="post-options-item danger" data-action="delete">Delete post</button>
+    `;
+    optionsWrapper.appendChild(optionsMenu);
+
+    optionsButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        togglePostOptionsMenu(optionsMenu, optionsButton);
+    }, true);
+
+    optionsMenu.addEventListener('click', (e) => {
+        const actionButton = e.target.closest('.post-options-item');
+        if (!actionButton) return;
+
+        e.stopPropagation();
+        handlePostOptionAction(actionButton.dataset.action, post);
+    });
+}
+
+/**
+ * Toggle a post options menu
+ * @param {HTMLElement} menu - Menu element
+ * @param {HTMLElement} button - Trigger button
+ */
+function togglePostOptionsMenu(menu, button) {
+    const isOpen = menu.classList.contains('show');
+    closeAllPostOptionsMenus();
+
+    if (!isOpen) {
+        menu.classList.add('show');
+        button.setAttribute('aria-expanded', 'true');
+    }
+}
+
+/**
+ * Close all open post option menus
+ */
+function closeAllPostOptionsMenus() {
+    document.querySelectorAll('.post-options-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+    });
+
+    document.querySelectorAll('.post-options-btn[aria-expanded="true"]').forEach(button => {
+        button.setAttribute('aria-expanded', 'false');
+    });
+}
+
+/**
+ * Handle a post menu action
+ * @param {string} action - Selected action name
+ * @param {Object} post - Post data object
+ */
+function handlePostOptionAction(action, post) {
+    closeAllPostOptionsMenus();
+
+    switch (action) {
+        case 'view':
+            openPostDetailModal(post);
+            break;
+        case 'copy':
+            copyPostCaption(post);
+            break;
+        case 'edit':
+            editPostCaption(post);
+            break;
+        case 'delete':
+            closePostDetailModal();
+            openDeletePostModal(post);
+            break;
+        default:
+            break;
+    }
+}
+
+/**
+ * Copy a post caption to the clipboard
+ * @param {Object} post - Post data object
+ */
+function copyPostCaption(post) {
+    const captionText = `${post.username}: ${post.caption}`;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(captionText)
+            .then(() => showToast('✅ Caption copied to clipboard!', 'success'))
+            .catch(() => showToast('⚠️ Could not copy caption.', 'error'));
+        return;
+    }
+
+    const tempInput = document.createElement('textarea');
+    tempInput.value = captionText;
+    tempInput.style.position = 'fixed';
+    tempInput.style.opacity = '0';
+    document.body.appendChild(tempInput);
+    tempInput.select();
+
+    try {
+        document.execCommand('copy');
+        showToast('✅ Caption copied to clipboard!', 'success');
+    } catch (error) {
+        showToast('⚠️ Could not copy caption.', 'error');
+    }
+
+    document.body.removeChild(tempInput);
+}
+
+/**
+ * Update a post in every local collection that stores it
+ * @param {number} postId - Post identifier
+ * @param {Function} updater - Function that mutates the matched post
+ */
+function updatePostById(postId, updater) {
+    app.posts.forEach(post => {
+        if (post.id === postId) {
+            updater(post);
+        }
+    });
+
+    app.currentUser.posts.forEach(post => {
+        if (post.id === postId) {
+            updater(post);
+        }
+    });
+}
+
+/**
+ * Find a post by id
+ * @param {number} postId - Post identifier
+ * @returns {Object|null} - The matching post or null
+ */
+function findPostById(postId) {
+    return app.posts.find(post => post.id === postId) || app.currentUser.posts.find(post => post.id === postId) || null;
+}
+
+/**
+ * Edit a post caption
+ * @param {Object} post - Post data object
+ */
+function editPostCaption(post) {
+    const updatedCaption = prompt('Edit your post caption:', post.caption);
+    if (updatedCaption === null) return;
+
+    const trimmedCaption = updatedCaption.trim();
+    if (!trimmedCaption) {
+        showToast('⚠️ Caption cannot be empty.', 'error');
+        return;
+    }
+
+    updatePostById(post.id, (targetPost) => {
+        targetPost.caption = trimmedCaption;
+    });
+
+    renderFeed();
+
+    if (document.getElementById('profile-page').classList.contains('active')) {
+        renderProfile();
+    }
+
+    if (app.currentDetailPostId === post.id) {
+        const updatedPost = findPostById(post.id);
+        if (updatedPost) {
+            openPostDetailModal(updatedPost, app.currentDetailImageIndex);
+        }
+    }
+
+    showToast('✏️ Post updated successfully!', 'success');
 }
 
 /**
@@ -561,7 +931,7 @@ function addComment() {
 function initCreatePost() {
     const imageUploadArea = document.getElementById('image-upload-area');
     const imageInput = document.getElementById('image-input');
-    const imagePreview = document.getElementById('image-preview');
+    const imagePreviewGrid = document.getElementById('image-preview-grid');
     const uploadPlaceholder = document.getElementById('upload-placeholder');
     const captionInput = document.getElementById('caption-input');
     const charCount = document.getElementById('char-count');
@@ -575,20 +945,21 @@ function initCreatePost() {
     imageUploadArea.addEventListener('click', uploadHandler);
     
     imageInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                imagePreview.src = event.target.result;
-                imagePreview.style.display = 'block';
-                uploadPlaceholder.style.display = 'none';
-                imageUploadArea.classList.add('has-image');
-                
-                // Add remove button
-                addRemoveImageButton(imageUploadArea);
-            };
-            reader.readAsDataURL(file);
+        const files = Array.from(e.target.files || []).filter(file => file.type.startsWith('image/'));
+        if (files.length === 0) {
+            return;
         }
+
+        const readers = files.map(file => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (event) => resolve(event.target.result);
+            reader.readAsDataURL(file);
+        }));
+
+        Promise.all(readers).then((images) => {
+            app.currentCreateImages = images;
+            renderCreateImagePreview(imageUploadArea, imagePreviewGrid, uploadPlaceholder);
+        });
     });
     
     // Character counter
@@ -602,7 +973,7 @@ function initCreatePost() {
             e.stopPropagation();
             const caption = captionInput.value.trim();
             
-            if (!imagePreview.src || imagePreview.style.display === 'none') {
+            if (app.currentCreateImages.length === 0) {
                 showToast('⚠️ Please add an image!', 'error');
                 return;
             }
@@ -617,7 +988,8 @@ function initCreatePost() {
                 id: app.posts.length + 1,
                 username: app.currentUser.username,
                 userPic: app.currentUser.profilePic,
-                image: imagePreview.src,
+                image: app.currentCreateImages[0],
+                images: [...app.currentCreateImages],
                 caption: caption,
             likes: 0,
             liked: false,
@@ -629,18 +1001,7 @@ function initCreatePost() {
         app.posts.unshift(newPost);
         app.currentUser.posts.push(newPost);
         
-        // Reset form
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-        uploadPlaceholder.style.display = 'flex';
-        imageUploadArea.classList.remove('has-image');
-        captionInput.value = '';
-        charCount.textContent = '0';
-        imageInput.value = '';
-        
-        // Remove remove button if exists
-        const removeBtn = imageUploadArea.querySelector('.remove-image-btn');
-        if (removeBtn) removeBtn.remove();
+        resetCreatePostForm(imageUploadArea, imagePreviewGrid, uploadPlaceholder, captionInput, charCount, imageInput);
         
         showToast('✨ Post created successfully!', 'success');
         
@@ -668,11 +1029,12 @@ function addRemoveImageButton(imageUploadArea) {
         e.stopPropagation();
         
         const imageInput = document.getElementById('image-input');
-        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewGrid = document.getElementById('image-preview-grid');
         const uploadPlaceholder = document.getElementById('upload-placeholder');
         
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
+        app.currentCreateImages = [];
+        imagePreviewGrid.innerHTML = '';
+        imagePreviewGrid.style.display = 'none';
         uploadPlaceholder.style.display = 'flex';
         imageUploadArea.classList.remove('has-image');
         imageInput.value = '';
@@ -680,6 +1042,53 @@ function addRemoveImageButton(imageUploadArea) {
     });
     
     imageUploadArea.appendChild(removeBtn);
+}
+
+/**
+ * Render the create-post preview grid
+ * @param {HTMLElement} imageUploadArea - Upload area element
+ * @param {HTMLElement} imagePreviewGrid - Preview grid element
+ * @param {HTMLElement} uploadPlaceholder - Placeholder element
+ */
+function renderCreateImagePreview(imageUploadArea, imagePreviewGrid, uploadPlaceholder) {
+    imagePreviewGrid.innerHTML = '';
+
+    app.currentCreateImages.forEach((imageSrc, index) => {
+        const previewItem = document.createElement('div');
+        previewItem.className = 'image-preview-item';
+        previewItem.innerHTML = `<img src="${imageSrc}" alt="Selected image ${index + 1}" class="image-preview-thumb">`;
+        imagePreviewGrid.appendChild(previewItem);
+    });
+
+    imagePreviewGrid.style.display = 'grid';
+    uploadPlaceholder.style.display = 'none';
+    imageUploadArea.classList.add('has-image');
+    addRemoveImageButton(imageUploadArea);
+}
+
+/**
+ * Reset the create-post form
+ * @param {HTMLElement} imageUploadArea - Upload area element
+ * @param {HTMLElement} imagePreviewGrid - Preview grid element
+ * @param {HTMLElement} uploadPlaceholder - Placeholder element
+ * @param {HTMLElement} captionInput - Caption input
+ * @param {HTMLElement} charCount - Character counter
+ * @param {HTMLElement} imageInput - File input
+ */
+function resetCreatePostForm(imageUploadArea, imagePreviewGrid, uploadPlaceholder, captionInput, charCount, imageInput) {
+    app.currentCreateImages = [];
+    imagePreviewGrid.innerHTML = '';
+    imagePreviewGrid.style.display = 'none';
+    uploadPlaceholder.style.display = 'flex';
+    imageUploadArea.classList.remove('has-image');
+    captionInput.value = '';
+    charCount.textContent = '0';
+    imageInput.value = '';
+
+    const removeBtn = imageUploadArea.querySelector('.remove-image-btn');
+    if (removeBtn) {
+        removeBtn.remove();
+    }
 }
 
 /* ========================================
@@ -973,10 +1382,11 @@ function renderProfilePosts() {
     }
     
     userPosts.forEach(post => {
+        const postImages = getPostImages(post);
         const postItem = document.createElement('div');
         postItem.className = 'profile-post-item';
         postItem.innerHTML = `
-            <img src="${post.image}" alt="Post">
+            <img src="${postImages[0]}" alt="Post">
             <div class="profile-post-overlay">
                 <div class="profile-post-overlay-text">❤️ ${post.likes} 💬 ${post.commentsList.length}</div>
             </div>
@@ -1037,6 +1447,13 @@ function initApp() {
     
     // Render initial feed
     renderFeed();
+
+    document.addEventListener('click', closeAllPostOptionsMenus);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeAllPostOptionsMenus();
+        }
+    });
     
     // Show welcome toast
     setTimeout(() => {
@@ -1305,6 +1722,7 @@ function initDeletePostModal() {
  */
 function openDeletePostModal(post) {
     app.currentDeletePostId = post.id;
+    closeAllPostOptionsMenus();
     const deletePostModal = document.getElementById('delete-post-modal');
     deletePostModal.classList.add('show');
 }
@@ -1341,6 +1759,9 @@ function confirmDeletePost() {
     
     // Refresh feed
     renderFeed();
+    if (document.getElementById('profile-page').classList.contains('active')) {
+        renderProfile();
+    }
     
     showToast('🗑️ Post deleted successfully!', 'success');
 }
@@ -1353,9 +1774,12 @@ function confirmDeletePost() {
  * Open post detail modal
  * @param {Object} post - Post object
  */
-function openPostDetailModal(post) {
+function openPostDetailModal(post, startIndex = 0) {
     const modal = document.getElementById('post-detail-modal');
     const container = document.getElementById('post-detail-container');
+    app.currentDetailPostId = post.id;
+    app.currentDetailImageIndex = startIndex;
+    closeAllPostOptionsMenus();
     
     // Get the current profile picture for the post's user
     let profilePicToUse = post.userPic;
@@ -1380,7 +1804,7 @@ function openPostDetailModal(post) {
                 </div>
                 ${isOwnPost ? `<button class="delete-post-btn" data-post-id="${post.id}">🗑️</button>` : ''}
             </div>
-            <img src="${post.image}" alt="Post" class="post-detail-image">
+            ${renderPostMedia(post, 'detail')}
             <div class="post-caption">
                 <strong>${post.username}</strong> ${post.caption}
             </div>
@@ -1421,7 +1845,7 @@ function openPostDetailModal(post) {
         const handleLikeClick = (e) => {
             e.stopPropagation();
             handleLike(post, likeBtn);
-            openPostDetailModal(post); // Refresh modal
+            openPostDetailModal(post, app.currentDetailImageIndex);
         };
         likeBtn.addEventListener('click', handleLikeClick);
     }
@@ -1443,6 +1867,9 @@ function openPostDetailModal(post) {
         };
         deleteBtn.addEventListener('click', handleDeleteClick);
     }
+
+    bindDetailGallery(container, post);
+    enhanceOwnPostActions(container, post);
     
     modal.classList.add('show');
 }
@@ -1453,6 +1880,9 @@ function openPostDetailModal(post) {
 function closePostDetailModal() {
     const modal = document.getElementById('post-detail-modal');
     modal.classList.remove('show');
+    app.currentDetailPostId = null;
+    app.currentDetailImageIndex = 0;
+    closeAllPostOptionsMenus();
 }
 
 /**
